@@ -1,2 +1,690 @@
-# My Project Title
-This is the description of my repository.
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Shared Notes Timeline</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<style>
+
+/************************************************
+RESET
+************************************************/
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+
+font-family:Inter,sans-serif;
+
+background:#f6f7fb;
+
+color:#222;
+
+overflow-x:hidden;
+
+}
+
+/************************************************
+VARIABLES
+************************************************/
+
+:root{
+
+--bg:white;
+
+--primary:#111;
+
+--secondary:#666;
+
+--border:#e7e7e7;
+
+--shadow:
+0 10px 35px rgba(0,0,0,.08);
+
+--radius:22px;
+
+--transition:.35s cubic-bezier(.2,.8,.2,1);
+
+}
+
+/************************************************
+APP
+************************************************/
+
+.app{
+
+width:100%;
+
+min-height:100vh;
+
+display:flex;
+
+flex-direction:column;
+
+}
+
+/************************************************
+HEADER
+************************************************/
+
+.header{
+
+height:80px;
+
+background:white;
+
+border-bottom:1px solid var(--border);
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 40px;
+
+position:sticky;
+
+top:0;
+
+z-index:500;
+
+}
+
+/************************************************
+CONTENT
+************************************************/
+
+.content{
+
+padding:40px;
+
+display:flex;
+
+flex-direction:column;
+
+gap:35px;
+
+}
+
+/************************************************
+TIMELINE
+************************************************/
+
+.timeline{
+
+display:flex;
+
+flex-direction:column;
+
+gap:32px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<div class="logoArea">
+
+<div class="logoCircle">
+
+📝
+
+</div>
+
+<div class="workspaceInfo">
+
+<h1>
+
+Shared Notes
+
+</h1>
+
+<p>
+
+Realtime collaborative notebook
+
+</p>
+
+</div>
+
+</div>
+
+<div class="headerMiddle">
+
+<div class="searchBox">
+
+<svg viewBox="0 0 24 24" width="18" height="18">
+
+<path fill="currentColor"
+d="M10 4a6 6 0 104.47 10.03l4.75 4.75 1.41-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/>
+
+</svg>
+
+<input
+
+type="text"
+
+placeholder="Search notes..."
+
+id="searchInput"
+
+>
+
+</div>
+
+</div>
+
+<div class="headerRight">
+
+<div class="statsCard">
+
+<span id="noteCount">
+
+0 Notes
+
+</span>
+
+</div>
+
+<button
+
+id="uploadButton"
+
+class="uploadBtn">
+
++
+
+Upload
+
+</button>
+
+</div>
+
+</header>
+
+<main class="content">
+
+<div class="timeline">
+
+<div class="timelineLine"></div>
+
+<section class="daySection">
+
+<div class="dayHeader">
+
+<div class="dayDot"></div>
+
+<h2>Monday</h2>
+
+</div>
+
+<div class="notesGrid" id="monday">
+
+<div class="noteCard addCard">
+
++
+
+Add Note
+
+</div>
+
+</div>
+
+</section>
+
+<section class="daySection">
+
+<div class="dayHeader">
+
+<div class="dayDot"></div>
+
+<h2>Tuesday</h2>
+
+</div>
+
+<div class="notesGrid" id="tuesday">
+
+<div class="noteCard addCard">
+
++
+
+Add Note
+
+</div>
+
+</div>
+
+</section>
+
+<section class="daySection">
+
+<div class="dayHeader">
+
+<div class="dayDot"></div>
+
+<h2>Wednesday</h2>
+
+</div>
+
+<div class="notesGrid" id="wednesday">
+
+<div class="noteCard addCard">
+
++
+
+Add Note
+
+</div>
+
+</div>
+
+</section>
+
+<section class="daySection">
+
+<div class="dayHeader">
+
+<div class="dayDot"></div>
+
+<h2>Thursday</h2>
+
+</div>
+
+<div class="notesGrid" id="thursday">
+
+<div class="noteCard addCard">
+
++
+
+Add Note
+
+</div>
+
+</div>
+
+</section>
+
+<section class="daySection">
+
+<div class="dayHeader">
+
+<div class="dayDot"></div>
+
+<h2>Friday</h2>
+
+</div>
+
+<div class="notesGrid" id="friday">
+
+<div class="noteCard addCard">
+
++
+
+Add Note
+
+</div>
+
+</div>
+
+</section>
+
+<section class="daySection">
+
+<div class="dayHeader">
+
+<div class="dayDot"></div>
+
+<h2>Saturday</h2>
+
+</div>
+
+<div class="notesGrid" id="saturday">
+
+<div class="noteCard addCard">
+
++
+
+Add Note
+
+</div>
+
+</div>
+
+</section>
+
+<section class="daySection">
+
+<div class="dayHeader">
+
+<div class="dayDot"></div>
+
+<h2>Sunday</h2>
+
+</div>
+
+<div class="notesGrid" id="sunday">
+
+<div class="noteCard addCard">
+
++
+
+Add Note
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+</main>
+
+</div>
+
+<script>
+// PART 1 JavaScript
+
+const notes = [];
+
+const uploadButton = document.getElementById("uploadButton");
+
+uploadButton.addEventListener("click", () => {
+
+    alert("Upload modal coming in Part 5!");
+
+});
+document.querySelectorAll(".addCard").forEach(card => {
+
+    card.addEventListener("click", () => {
+
+        alert("Upload window coming in Part 4");
+
+    });
+
+});
+/* ===== PART 3B ===== */
+
+.timeline{
+position:relative;
+display:flex;
+flex-direction:column;
+gap:45px;
+}
+
+.timelineLine{
+position:absolute;
+left:16px;
+top:15px;
+bottom:15px;
+width:2px;
+background:#e5e5e5;
+}
+
+.daySection{
+position:relative;
+padding-left:55px;
+}
+
+.dayHeader{
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:18px;
+}
+
+.dayHeader h2{
+font-size:22px;
+font-weight:700;
+}
+
+.dayDot{
+width:18px;
+height:18px;
+border-radius:50%;
+background:#111;
+margin-left:-48px;
+z-index:2;
+box-shadow:0 0 0 6px white;
+}
+
+.notesGrid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:22px;
+}
+
+.noteCard{
+background:white;
+border-radius:22px;
+border:1px solid var(--border);
+height:170px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:18px;
+font-weight:600;
+cursor:pointer;
+transition:var(--transition);
+box-shadow:0 10px 30px rgba(0,0,0,.04);
+}
+
+.noteCard:hover{
+transform:translateY(-8px);
+box-shadow:0 25px 60px rgba(0,0,0,.12);
+}
+
+.addCard{
+background:#fafafa;
+border:2px dashed #d8d8d8;
+color:#777;
+}
+
+.addCard:hover{
+background:white;
+border-color:#111;
+color:#111;
+}
+/* ===== HEADER ===== */
+
+.logoArea{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.logoCircle{
+width:52px;
+height:52px;
+border-radius:18px;
+background:#111;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:24px;
+box-shadow:var(--shadow);
+}
+
+.workspaceInfo h1{
+font-size:24px;
+font-weight:700;
+}
+
+.workspaceInfo p{
+font-size:13px;
+color:#777;
+margin-top:4px;
+}
+
+.headerMiddle{
+flex:1;
+display:flex;
+justify-content:center;
+}
+
+.searchBox{
+width:430px;
+height:48px;
+background:#f3f3f3;
+border-radius:15px;
+display:flex;
+align-items:center;
+padding:0 18px;
+gap:10px;
+}
+
+.searchBox input{
+flex:1;
+background:none;
+border:none;
+outline:none;
+font-size:15px;
+}
+
+.headerRight{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.statsCard{
+padding:12px 18px;
+border-radius:15px;
+background:white;
+border:1px solid var(--border);
+font-weight:600;
+}
+
+.uploadBtn{
+height:48px;
+padding:0 30px;
+border:none;
+background:#111;
+color:white;
+border-radius:16px;
+cursor:pointer;
+transition:var(--transition);
+}
+
+.uploadBtn:hover{
+transform:translateY(-3px);
+}
+
+/* ===== TIMELINE ===== */
+
+.timeline{
+position:relative;
+display:flex;
+flex-direction:column;
+gap:45px;
+}
+
+.timelineLine{
+position:absolute;
+left:16px;
+top:10px;
+bottom:10px;
+width:2px;
+background:#ddd;
+}
+
+.daySection{
+position:relative;
+padding-left:55px;
+}
+
+.dayHeader{
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:18px;
+}
+
+.dayHeader h2{
+font-size:22px;
+font-weight:700;
+}
+
+.dayDot{
+width:18px;
+height:18px;
+border-radius:50%;
+background:#111;
+margin-left:-48px;
+box-shadow:0 0 0 6px white;
+z-index:2;
+}
+
+.notesGrid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:22px;
+}
+
+.noteCard{
+height:170px;
+background:white;
+border-radius:22px;
+display:flex;
+align-items:center;
+justify-content:center;
+border:1px solid var(--border);
+box-shadow:0 12px 30px rgba(0,0,0,.05);
+transition:.35s;
+font-weight:600;
+cursor:pointer;
+}
+
+.noteCard:hover{
+transform:translateY(-8px);
+box-shadow:0 24px 50px rgba(0,0,0,.12);
+}
+
+.addCard{
+border:2px dashed #ccc;
+background:#fafafa;
+color:#777;
+}
+
+.addCard:hover{
+border-color:#111;
+background:white;
+color:#111;
+}
+</script>
+
+</body>
+
+</html>
