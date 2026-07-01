@@ -1,690 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Notes Widget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-<meta charset="UTF-8">
+        // CONFIGURATION: Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
 
-<title>Shared Notes Timeline</title>
+        // App State
+        let notes = [];
+        const notesContainer = document.getElementById('notes-container');
+        const uploadModal = document.getElementById('upload-modal');
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
+        // Auth
+        signInAnonymously(auth);
 
-<link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
+        // Real-time listener
+        const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderNotes();
+        });
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-rel="stylesheet">
+        function renderNotes() {
+            notesContainer.innerHTML = notes.map(note => `
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 ease-[cubic-bezier(.2,.8,.2,1)]">
+                    <img src="${note.imageUrl}" class="w-full h-48 object-cover rounded-2xl mb-4" />
+                    <h3 class="font-semibold text-lg text-gray-900">${note.title}</h3>
+                    <p class="text-sm text-gray-500">${note.day}</p>
+                </div>
+            `).join('');
+        }
 
-<style>
+        // Upload Logic
+        window.handleUpload = async () => {
+            const fileInput = document.getElementById('file-input');
+            const titleInput = document.getElementById('title-input');
+            const file = fileInput.files[0];
+            
+            if(!file) return;
 
-/************************************************
-RESET
-************************************************/
+            const storageRef = ref(storage, 'notes/' + Date.now() + file.name);
+            const snapshot = await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(snapshot.ref);
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
+            await addDoc(collection(db, "notes"), {
+                title: titleInput.value,
+                day: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+                imageUrl: downloadURL,
+                createdAt: new Date()
+            });
 
-html{
-scroll-behavior:smooth;
-}
-
-body{
-
-font-family:Inter,sans-serif;
-
-background:#f6f7fb;
-
-color:#222;
-
-overflow-x:hidden;
-
-}
-
-/************************************************
-VARIABLES
-************************************************/
-
-:root{
-
---bg:white;
-
---primary:#111;
-
---secondary:#666;
-
---border:#e7e7e7;
-
---shadow:
-0 10px 35px rgba(0,0,0,.08);
-
---radius:22px;
-
---transition:.35s cubic-bezier(.2,.8,.2,1);
-
-}
-
-/************************************************
-APP
-************************************************/
-
-.app{
-
-width:100%;
-
-min-height:100vh;
-
-display:flex;
-
-flex-direction:column;
-
-}
-
-/************************************************
-HEADER
-************************************************/
-
-.header{
-
-height:80px;
-
-background:white;
-
-border-bottom:1px solid var(--border);
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-padding:0 40px;
-
-position:sticky;
-
-top:0;
-
-z-index:500;
-
-}
-
-/************************************************
-CONTENT
-************************************************/
-
-.content{
-
-padding:40px;
-
-display:flex;
-
-flex-direction:column;
-
-gap:35px;
-
-}
-
-/************************************************
-TIMELINE
-************************************************/
-
-.timeline{
-
-display:flex;
-
-flex-direction:column;
-
-gap:32px;
-
-}
-
-</style>
-
+            uploadModal.classList.add('hidden');
+        };
+    </script>
 </head>
-
-<body>
-
-<div class="app">
-
-<header class="header">
-
-<div class="logoArea">
-
-<div class="logoCircle">
-
-📝
-
-</div>
-
-<div class="workspaceInfo">
-
-<h1>
-
-Shared Notes
-
-</h1>
-
-<p>
-
-Realtime collaborative notebook
-
-</p>
-
-</div>
-
-</div>
-
-<div class="headerMiddle">
-
-<div class="searchBox">
-
-<svg viewBox="0 0 24 24" width="18" height="18">
-
-<path fill="currentColor"
-d="M10 4a6 6 0 104.47 10.03l4.75 4.75 1.41-1.41-4.75-4.75A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/>
-
-</svg>
-
-<input
-
-type="text"
-
-placeholder="Search notes..."
-
-id="searchInput"
-
->
-
-</div>
-
-</div>
-
-<div class="headerRight">
-
-<div class="statsCard">
-
-<span id="noteCount">
-
-0 Notes
-
-</span>
-
-</div>
-
-<button
-
-id="uploadButton"
-
-class="uploadBtn">
-
-+
-
-Upload
-
-</button>
-
-</div>
-
-</header>
-
-<main class="content">
-
-<div class="timeline">
-
-<div class="timelineLine"></div>
-
-<section class="daySection">
-
-<div class="dayHeader">
-
-<div class="dayDot"></div>
-
-<h2>Monday</h2>
-
-</div>
-
-<div class="notesGrid" id="monday">
-
-<div class="noteCard addCard">
-
-+
-
-Add Note
-
-</div>
-
-</div>
-
-</section>
-
-<section class="daySection">
-
-<div class="dayHeader">
-
-<div class="dayDot"></div>
-
-<h2>Tuesday</h2>
-
-</div>
-
-<div class="notesGrid" id="tuesday">
-
-<div class="noteCard addCard">
-
-+
-
-Add Note
-
-</div>
-
-</div>
-
-</section>
-
-<section class="daySection">
-
-<div class="dayHeader">
-
-<div class="dayDot"></div>
-
-<h2>Wednesday</h2>
-
-</div>
-
-<div class="notesGrid" id="wednesday">
-
-<div class="noteCard addCard">
-
-+
-
-Add Note
-
-</div>
-
-</div>
-
-</section>
-
-<section class="daySection">
-
-<div class="dayHeader">
-
-<div class="dayDot"></div>
-
-<h2>Thursday</h2>
-
-</div>
-
-<div class="notesGrid" id="thursday">
-
-<div class="noteCard addCard">
-
-+
-
-Add Note
-
-</div>
-
-</div>
-
-</section>
-
-<section class="daySection">
-
-<div class="dayHeader">
-
-<div class="dayDot"></div>
-
-<h2>Friday</h2>
-
-</div>
-
-<div class="notesGrid" id="friday">
-
-<div class="noteCard addCard">
-
-+
-
-Add Note
-
-</div>
-
-</div>
-
-</section>
-
-<section class="daySection">
-
-<div class="dayHeader">
-
-<div class="dayDot"></div>
-
-<h2>Saturday</h2>
-
-</div>
-
-<div class="notesGrid" id="saturday">
-
-<div class="noteCard addCard">
-
-+
-
-Add Note
-
-</div>
-
-</div>
-
-</section>
-
-<section class="daySection">
-
-<div class="dayHeader">
-
-<div class="dayDot"></div>
-
-<h2>Sunday</h2>
-
-</div>
-
-<div class="notesGrid" id="sunday">
-
-<div class="noteCard addCard">
-
-+
-
-Add Note
-
-</div>
-
-</div>
-
-</section>
-
-</div>
-
-</main>
-
-</div>
-
-<script>
-// PART 1 JavaScript
-
-const notes = [];
-
-const uploadButton = document.getElementById("uploadButton");
-
-uploadButton.addEventListener("click", () => {
-
-    alert("Upload modal coming in Part 5!");
-
-});
-document.querySelectorAll(".addCard").forEach(card => {
-
-    card.addEventListener("click", () => {
-
-        alert("Upload window coming in Part 4");
-
-    });
-
-});
-/* ===== PART 3B ===== */
-
-.timeline{
-position:relative;
-display:flex;
-flex-direction:column;
-gap:45px;
-}
-
-.timelineLine{
-position:absolute;
-left:16px;
-top:15px;
-bottom:15px;
-width:2px;
-background:#e5e5e5;
-}
-
-.daySection{
-position:relative;
-padding-left:55px;
-}
-
-.dayHeader{
-display:flex;
-align-items:center;
-gap:15px;
-margin-bottom:18px;
-}
-
-.dayHeader h2{
-font-size:22px;
-font-weight:700;
-}
-
-.dayDot{
-width:18px;
-height:18px;
-border-radius:50%;
-background:#111;
-margin-left:-48px;
-z-index:2;
-box-shadow:0 0 0 6px white;
-}
-
-.notesGrid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-gap:22px;
-}
-
-.noteCard{
-background:white;
-border-radius:22px;
-border:1px solid var(--border);
-height:170px;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:18px;
-font-weight:600;
-cursor:pointer;
-transition:var(--transition);
-box-shadow:0 10px 30px rgba(0,0,0,.04);
-}
-
-.noteCard:hover{
-transform:translateY(-8px);
-box-shadow:0 25px 60px rgba(0,0,0,.12);
-}
-
-.addCard{
-background:#fafafa;
-border:2px dashed #d8d8d8;
-color:#777;
-}
-
-.addCard:hover{
-background:white;
-border-color:#111;
-color:#111;
-}
-/* ===== HEADER ===== */
-
-.logoArea{
-display:flex;
-align-items:center;
-gap:18px;
-}
-
-.logoCircle{
-width:52px;
-height:52px;
-border-radius:18px;
-background:#111;
-color:#fff;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:24px;
-box-shadow:var(--shadow);
-}
-
-.workspaceInfo h1{
-font-size:24px;
-font-weight:700;
-}
-
-.workspaceInfo p{
-font-size:13px;
-color:#777;
-margin-top:4px;
-}
-
-.headerMiddle{
-flex:1;
-display:flex;
-justify-content:center;
-}
-
-.searchBox{
-width:430px;
-height:48px;
-background:#f3f3f3;
-border-radius:15px;
-display:flex;
-align-items:center;
-padding:0 18px;
-gap:10px;
-}
-
-.searchBox input{
-flex:1;
-background:none;
-border:none;
-outline:none;
-font-size:15px;
-}
-
-.headerRight{
-display:flex;
-align-items:center;
-gap:18px;
-}
-
-.statsCard{
-padding:12px 18px;
-border-radius:15px;
-background:white;
-border:1px solid var(--border);
-font-weight:600;
-}
-
-.uploadBtn{
-height:48px;
-padding:0 30px;
-border:none;
-background:#111;
-color:white;
-border-radius:16px;
-cursor:pointer;
-transition:var(--transition);
-}
-
-.uploadBtn:hover{
-transform:translateY(-3px);
-}
-
-/* ===== TIMELINE ===== */
-
-.timeline{
-position:relative;
-display:flex;
-flex-direction:column;
-gap:45px;
-}
-
-.timelineLine{
-position:absolute;
-left:16px;
-top:10px;
-bottom:10px;
-width:2px;
-background:#ddd;
-}
-
-.daySection{
-position:relative;
-padding-left:55px;
-}
-
-.dayHeader{
-display:flex;
-align-items:center;
-gap:15px;
-margin-bottom:18px;
-}
-
-.dayHeader h2{
-font-size:22px;
-font-weight:700;
-}
-
-.dayDot{
-width:18px;
-height:18px;
-border-radius:50%;
-background:#111;
-margin-left:-48px;
-box-shadow:0 0 0 6px white;
-z-index:2;
-}
-
-.notesGrid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-gap:22px;
-}
-
-.noteCard{
-height:170px;
-background:white;
-border-radius:22px;
-display:flex;
-align-items:center;
-justify-content:center;
-border:1px solid var(--border);
-box-shadow:0 12px 30px rgba(0,0,0,.05);
-transition:.35s;
-font-weight:600;
-cursor:pointer;
-}
-
-.noteCard:hover{
-transform:translateY(-8px);
-box-shadow:0 24px 50px rgba(0,0,0,.12);
-}
-
-.addCard{
-border:2px dashed #ccc;
-background:#fafafa;
-color:#777;
-}
-
-.addCard:hover{
-border-color:#111;
-background:white;
-color:#111;
-}
-</script>
-
+<body class="bg-gray-50 text-gray-900 font-sans p-8 md:p-16">
+
+    <header class="max-w-5xl mx-auto flex justify-between items-center mb-16">
+        <h1 class="text-3xl font-bold tracking-tight">Shared Notes</h1>
+        <button onclick="document.getElementById('upload-modal').classList.remove('hidden')" 
+                class="bg-black text-white px-6 py-3 rounded-full hover:scale-105 transition-transform">
+            + Upload Note
+        </button>
+    </header>
+
+    <main id="notes-container" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Notes will be injected here -->
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">New Note</h2>
+            <input type="text" id="title-input" placeholder="Note Title" class="w-full p-4 border rounded-xl mb-4">
+            <input type="file" id="file-input" class="mb-6">
+            <div class="flex gap-4">
+                <button onclick="handleUpload()" class="flex-1 bg-black text-white py-3 rounded-xl">Submit</button>
+                <button onclick="document.getElementById('upload-modal').classList.add('hidden')" class="flex-1 bg-gray-100 py-3 rounded-xl">Cancel</button>
+            </div>
+        </div>
+    </div>
 </body>
-
 </html>
