@@ -516,6 +516,173 @@ background:white;
 border-color:#111;
 color:#111;
 }
+/* ===== HEADER ===== */
+
+.logoArea{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.logoCircle{
+width:52px;
+height:52px;
+border-radius:18px;
+background:#111;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:24px;
+box-shadow:var(--shadow);
+}
+
+.workspaceInfo h1{
+font-size:24px;
+font-weight:700;
+}
+
+.workspaceInfo p{
+font-size:13px;
+color:#777;
+margin-top:4px;
+}
+
+.headerMiddle{
+flex:1;
+display:flex;
+justify-content:center;
+}
+
+.searchBox{
+width:430px;
+height:48px;
+background:#f3f3f3;
+border-radius:15px;
+display:flex;
+align-items:center;
+padding:0 18px;
+gap:10px;
+}
+
+.searchBox input{
+flex:1;
+background:none;
+border:none;
+outline:none;
+font-size:15px;
+}
+
+.headerRight{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.statsCard{
+padding:12px 18px;
+border-radius:15px;
+background:white;
+border:1px solid var(--border);
+font-weight:600;
+}
+
+.uploadBtn{
+height:48px;
+padding:0 30px;
+border:none;
+background:#111;
+color:white;
+border-radius:16px;
+cursor:pointer;
+transition:var(--transition);
+}
+
+.uploadBtn:hover{
+transform:translateY(-3px);
+}
+
+/* ===== TIMELINE ===== */
+
+.timeline{
+position:relative;
+display:flex;
+flex-direction:column;
+gap:45px;
+}
+
+.timelineLine{
+position:absolute;
+left:16px;
+top:10px;
+bottom:10px;
+width:2px;
+background:#ddd;
+}
+
+.daySection{
+position:relative;
+padding-left:55px;
+}
+
+.dayHeader{
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:18px;
+}
+
+.dayHeader h2{
+font-size:22px;
+font-weight:700;
+}
+
+.dayDot{
+width:18px;
+height:18px;
+border-radius:50%;
+background:#111;
+margin-left:-48px;
+box-shadow:0 0 0 6px white;
+z-index:2;
+}
+
+.notesGrid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:22px;
+}
+
+.noteCard{
+height:170px;
+background:white;
+border-radius:22px;
+display:flex;
+align-items:center;
+justify-content:center;
+border:1px solid var(--border);
+box-shadow:0 12px 30px rgba(0,0,0,.05);
+transition:.35s;
+font-weight:600;
+cursor:pointer;
+}
+
+.noteCard:hover{
+transform:translateY(-8px);
+box-shadow:0 24px 50px rgba(0,0,0,.12);
+}
+
+.addCard{
+border:2px dashed #ccc;
+background:#fafafa;
+color:#777;
+}
+
+.addCard:hover{
+border-color:#111;
+background:white;
+color:#111;
+}
 </script>
 
 </body>
