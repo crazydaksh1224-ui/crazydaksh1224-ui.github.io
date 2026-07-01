@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shared Gallery Widget</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shared Albums Widget</title>
     <style>
         /* CSS Variables for Apple-style Light Theme */
         :root {
@@ -15,17 +15,14 @@
             --accent-color: #0071e3;
             --accent-hover: #0077ED;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --modal-overlay: rgba(0, 0, 0, 0.4);
+            --lightbox-bg: rgba(0, 0, 0, 0.95);
             --radius-lg: 24px;
             --radius-md: 14px;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* Typography & Base Setup */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -38,30 +35,13 @@
             align-items: center;
         }
 
-        .widget-container {
-            width: 100%;
-            max-width: 900px;
-        }
+        .widget-container { width: 100%; max-width: 900px; }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+        header { text-align: center; margin-bottom: 40px; }
+        header h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 8px; }
+        header p { font-size: 19px; color: var(--text-secondary); font-weight: 400; }
 
-        header h1 {
-            font-size: 40px;
-            font-weight: 700;
-            letter-spacing: -0.015em;
-            margin-bottom: 8px;
-        }
-
-        header p {
-            font-size: 19px;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-
-        /* Glassmorphism Upload Section */
+        /* Upload Section */
         .upload-section {
             background: var(--card-bg);
             backdrop-filter: saturate(180%) blur(20px);
@@ -76,129 +56,112 @@
             gap: 20px;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .input-group label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+        
         input[type="text"], input[type="file"] {
-            width: 100%;
-            padding: 16px;
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255,255,255,0.8);
-            font-size: 16px;
-            font-family: inherit;
-            transition: var(--transition);
+            width: 100%; padding: 16px; border-radius: var(--radius-md);
+            border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.8);
+            font-size: 16px; font-family: inherit; transition: var(--transition);
         }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
-        }
-
+        input[type="text"]:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2); }
         input[type="file"]::file-selector-button {
-            background-color: var(--bg-color);
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            padding: 8px 16px;
-            margin-right: 16px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
+            background-color: var(--bg-color); border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px; padding: 8px 16px; margin-right: 16px;
+            cursor: pointer; font-weight: 500; transition: var(--transition);
         }
-
-        input[type="file"]::file-selector-button:hover {
-            background-color: #e8e8ed;
-        }
-
+        
         .btn-submit {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 16px 24px;
-            border-radius: 980px; /* Apple pill shape */
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            align-self: flex-end;
+            background-color: var(--accent-color); color: white; border: none;
+            padding: 16px 24px; border-radius: 980px; font-size: 17px;
+            font-weight: 600; cursor: pointer; transition: var(--transition); align-self: flex-end;
         }
+        .btn-submit:hover { background-color: var(--accent-hover); transform: scale(1.02); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .btn-submit:hover {
-            background-color: var(--accent-hover);
-            transform: scale(1.02);
-        }
+        /* Gallery Grid (Albums) */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
 
-        .btn-submit:active {
-            transform: scale(0.98);
-        }
-
-        /* Gallery Grid */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        /* Individual Photo Card */
         .card {
-            background: var(--card-bg);
-            backdrop-filter: saturate(180%) blur(20px);
+            background: var(--card-bg); backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
-            border: var(--glass-border);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            cursor: pointer;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInCard 0.6s ease forwards;
+            border: var(--glass-border); border-radius: var(--radius-lg);
+            overflow: hidden; box-shadow: var(--shadow); transition: var(--transition);
+            cursor: pointer; position: relative;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .card:hover { transform: translateY(-5px) scale(1.01); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12); }
+
+        .card-image { width: 100%; height: 220px; object-fit: cover; background-color: #e8e8ed; }
+        .photo-count {
+            position: absolute; top: 16px; right: 16px;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            color: white; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 980px;
+        }
+        .card-content { padding: 20px; }
+        .card-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.01em; }
+        .card-date { font-size: 14px; color: var(--text-secondary); }
+
+        /* Album Modal (Inside the card view) */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-overlay); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: flex-end; /* Slides up from bottom like Apple Maps/Photos */
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease; z-index: 100;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        
+        .modal-content {
+            background: var(--bg-color); width: 100%; max-width: 900px; height: 85vh;
+            border-radius: 24px 24px 0 0; padding: 30px; overflow-y: auto;
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.2); position: relative;
+        }
+        .modal.active .modal-content { transform: translateY(0); }
+        
+        .close-btn {
+            position: sticky; top: 0; float: right; background: rgba(0,0,0,0.1); border: none;
+            width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 2; margin-bottom: -36px;
         }
 
-        .card:hover {
-            transform: translateY(-5px) scale(1.01);
-            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+        .modal-title { font-size: 32px; font-weight: 700; margin-bottom: 24px; padding-top: 10px;}
+        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .album-item {
+            width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px;
+            cursor: pointer; transition: transform 0.2s;
         }
+        .album-item:hover { transform: scale(1.03); }
 
-        .card-image {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            background-color: #e8e8ed;
+        /* Lightbox (Full screen image viewer) */
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--lightbox-bg); display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200;
         }
-
-        .card-content {
-            padding: 20px;
+        .lightbox.active { opacity: 1; pointer-events: auto; }
+        
+        .lightbox-img {
+            max-width: 90%; max-height: 90vh; border-radius: 12px;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: zoom-in;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
+        .lightbox-img.zoomed { transform: scale(2); cursor: zoom-out; }
 
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            letter-spacing: -0.01em;
-        }
+        .lb-controls { position: absolute; color: white; background: rgba(255,255,255,0.2); border: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); width: 50px; height: 50px; border-radius: 25px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .lb-controls:hover { background: rgba(255,255,255,0.4); }
+        .lb-prev { left: 20px; }
+        .lb-next { right: 20px; }
+        .lb-close { top: 20px; right: 20px; }
+        
+        @keyframes fadeIn { to { opacity: 1; } }
 
-        .card-date {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Animations */
-        @keyframes fadeInCard {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .album-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            header h1 { font-size: 32px; }
+            .modal-content { height: 90vh; padding: 20px; }
+            .lb-controls { width: 40px; height: 40px; font-size: 18px; }
         }
     </style>
 </head>
@@ -206,95 +169,204 @@
 
     <div class="widget-container">
         <header>
-            <h1>Shared Moments</h1>
-            <p>Upload and share your photos with everyone.</p>
+            <h1>Shared Albums</h1>
+            <p>Upload and organize your memories.</p>
         </header>
 
         <div class="upload-section">
             <div class="input-group">
-                <label for="photoTitle">Card Title</label>
-                <input type="text" id="photoTitle" placeholder="E.g., Trip to the Mountains..." required>
+                <label for="albumTitle">Album Title</label>
+                <input type="text" id="albumTitle" placeholder="E.g., Summer Vacation..." required>
             </div>
             
             <div class="input-group">
-                <label for="photoFile">Select Photo</label>
-                <input type="file" id="photoFile" accept="image/*" required>
+                <label for="photoFiles">Select Photos</label>
+                <input type="file" id="photoFiles" accept="image/*" multiple required>
             </div>
 
-            <button class="btn-submit" onclick="handleUpload()">Share Photo</button>
+            <button class="btn-submit" id="submitBtn" onclick="handleUpload()">Create Album</button>
         </div>
 
-        <div class="gallery-grid" id="galleryGrid">
-            </div>
+        <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+
+    <div class="modal" id="albumModal" onclick="closeModal(event)">
+        <div class="modal-content" id="modalContent">
+            <button class="close-btn" onclick="closeModal(event, true)">✕</button>
+            <h2 class="modal-title" id="modalTitle">Album Title</h2>
+            <div class="album-grid" id="albumGrid"></div>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lb-controls lb-close" onclick="closeLightbox()">✕</button>
+        <button class="lb-controls lb-prev" onclick="navigateLightbox(-1)">❮</button>
+        <img src="" alt="" class="lightbox-img" id="lightboxImg" onclick="toggleZoom()">
+        <button class="lb-controls lb-next" onclick="navigateLightbox(1)">❯</button>
     </div>
 
     <script>
-        // Array to hold our local state for demonstration purposes
-        const cardsData = [];
+        let albumsData = []; // Main state
+        let currentAlbumIndex = null;
+        let currentPhotoIndex = null;
 
-        function handleUpload() {
-            const titleInput = document.getElementById('photoTitle');
-            const fileInput = document.getElementById('photoFile');
+        // 1. Upload Logic
+        async function handleUpload() {
+            const titleInput = document.getElementById('albumTitle');
+            const fileInput = document.getElementById('photoFiles');
+            const submitBtn = document.getElementById('submitBtn');
 
             const title = titleInput.value.trim();
-            const file = fileInput.files[0];
+            const files = Array.from(fileInput.files); // Convert FileList to Array
 
-            // Basic validation
-            if (!title) {
-                alert("Please provide a title for your card.");
-                return;
-            }
-            if (!file) {
-                alert("Please select a photo to upload.");
-                return;
-            }
+            if (!title) return alert("Please provide a title.");
+            if (files.length === 0) return alert("Please select at least one photo.");
 
-            // Read the file as a Data URL so we can display it immediately
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imageUrl = e.target.result;
-                
-                // Create a data object
-                const newCard = {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Processing...";
+
+            try {
+                // Read all files asynchronously
+                const imagePromises = files.map(file => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                });
+
+                // Wait for all images to be converted to Base64 data URLs
+                const images = await Promise.all(imagePromises);
+
+                const newAlbum = {
                     id: Date.now(),
                     title: title,
-                    imageUrl: imageUrl,
+                    images: images,
                     date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                 };
 
-                // Add to our state array and re-render
-                cardsData.unshift(newCard); // unshift adds to the beginning of the array
+                albumsData.unshift(newAlbum);
                 renderGallery();
 
-                // Reset inputs
+                // Reset
                 titleInput.value = '';
                 fileInput.value = '';
-            };
-
-            reader.readAsDataURL(file);
+            } catch (error) {
+                alert("Error processing images.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Create Album";
+            }
         }
 
+        // 2. Render Main Grid
         function renderGallery() {
-            const galleryGrid = document.getElementById('galleryGrid');
-            galleryGrid.innerHTML = ''; // Clear current grid
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
 
-            cardsData.forEach(card => {
-                // Create card container
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
+            albumsData.forEach((album, index) => {
+                const coverImage = album.images[0];
+                const count = album.images.length;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openAlbum(index);
 
-                // Inject HTML structure for the card
-                cardElement.innerHTML = `
-                    <img src="${card.imageUrl}" alt="${card.title}" class="card-image">
+                card.innerHTML = `
+                    <div style="position:relative">
+                        <img src="${coverImage}" alt="${album.title}" class="card-image">
+                        <span class="photo-count">${count} ${count > 1 ? 'Photos' : 'Photo'}</span>
+                    </div>
                     <div class="card-content">
-                        <h3 class="card-title">${card.title}</h3>
-                        <span class="card-date">${card.date}</span>
+                        <h3 class="card-title">${album.title}</h3>
+                        <span class="card-date">${album.date}</span>
                     </div>
                 `;
-
-                galleryGrid.appendChild(cardElement);
+                grid.appendChild(card);
             });
         }
+
+        // 3. Album Modal Logic
+        function openAlbum(index) {
+            currentAlbumIndex = index;
+            const album = albumsData[index];
+            const modal = document.getElementById('albumModal');
+            const title = document.getElementById('modalTitle');
+            const grid = document.getElementById('albumGrid');
+
+            title.textContent = album.title;
+            grid.innerHTML = '';
+
+            album.images.forEach((imgSrc, imgIndex) => {
+                const imgEl = document.createElement('img');
+                imgEl.src = imgSrc;
+                imgEl.className = 'album-item';
+                imgEl.onclick = () => openLightbox(imgIndex);
+                grid.appendChild(imgEl);
+            });
+
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            modal.classList.add('active');
+        }
+
+        function closeModal(event, force = false) {
+            // Close if clicking outside the modal content, or if force closed (X button)
+            if (force || event.target.id === 'albumModal') {
+                document.getElementById('albumModal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // 4. Lightbox Logic
+        function openLightbox(imgIndex) {
+            currentPhotoIndex = imgIndex;
+            updateLightboxImage();
+            document.getElementById('lightbox').classList.add('active');
+            
+            // Remove zoom if open new image
+            document.getElementById('lightboxImg').classList.remove('zoomed');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.getElementById('lightboxImg').classList.remove('zoomed');
+        }
+
+        function updateLightboxImage() {
+            const album = albumsData[currentAlbumIndex];
+            const img = document.getElementById('lightboxImg');
+            img.src = album.images[currentPhotoIndex];
+            img.classList.remove('zoomed'); // reset zoom on navigation
+        }
+
+        function navigateLightbox(direction) {
+            const album = albumsData[currentAlbumIndex];
+            currentPhotoIndex += direction;
+
+            // Loop around if at the ends
+            if (currentPhotoIndex < 0) currentPhotoIndex = album.images.length - 1;
+            if (currentPhotoIndex >= album.images.length) currentPhotoIndex = 0;
+
+            updateLightboxImage();
+        }
+
+        // 5. Zoom Logic
+        function toggleZoom() {
+            const img = document.getElementById('lightboxImg');
+            img.classList.toggle('zoomed');
+        }
+
+        // Keyboard navigation for Lightbox
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'ArrowRight') navigateLightbox(1);
+                if (e.key === 'ArrowLeft') navigateLightbox(-1);
+                if (e.key === 'Escape') closeLightbox();
+            } else if (document.getElementById('albumModal').classList.contains('active')) {
+                if (e.key === 'Escape') closeModal(e, true);
+            }
+        });
     </script>
 </body>
 </html>
