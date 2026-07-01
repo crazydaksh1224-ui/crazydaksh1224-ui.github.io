@@ -1,556 +1,512 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DRD DOMAIN</title>
-    <style>
-        /* CSS Variables for Genuine Notion-Style Theme */
-        :root {
-            /* Notion Light Theme Colors */
-            --bg-color: #ffffff;
-            --text-primary: #37352f;
-            --text-secondary: #787774;
-            --card-bg: #f1f1ef;
-            --input-bg: #f4f5f6;
-            --glass-border: 1px solid rgba(55, 53, 47, 0.09);
-            --accent-color: #2383e2;
-            --accent-hover: #1a6ab4;
-            --danger-color: #eb5757;
-            --shadow: 0px 1px 2px rgba(15, 15, 15, 0.1);
-            --modal-overlay: rgba(15, 15, 15, 0.4);
-            --lightbox-bg: rgba(15, 15, 15, 0.95);
-            --radius-lg: 12px; /* Notion uses subtler radiuses */
-            --radius-md: 6px;
-            --transition: all 0.2s ease-in-out;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DRD DOMAIN</title>
+    <style>
+        /* CSS Variables for Apple-style Light Theme */
+        :root {
+            --bg-color: #f5f5f7;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+            --accent-color: #0071e3;
+            --accent-hover: #0077ED;
+            --danger-color: #ff3b30;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --modal-overlay: rgba(0, 0, 0, 0.4);
+            --lightbox-bg: rgba(0, 0, 0, 0.95);
+            --radius-lg: 24px;
+            --radius-md: 14px;
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
 
-        /* Notion Dark Theme Colors */
-        body.dark-theme {
-            --bg-color: #191919;
-            --text-primary: #e3e3e3;
-            --text-secondary: #9b9b9b;
-            --card-bg: #202020;
-            --input-bg: #252525;
-            --glass-border: 1px solid rgba(255, 255, 255, 0.09);
-            --accent-color: #2eaadc;
-            --accent-hover: #1c8cb9;
-            --danger-color: #ff7369;
-            --shadow: 0px 1px 2px rgba(0, 0, 0, 0.4);
-            --modal-overlay: rgba(0, 0, 0, 0.6);
-            --lightbox-bg: rgba(0, 0, 0, 0.98);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        .widget-container { width: 100%; max-width: 900px; }
 
-        .widget-container { width: 100%; max-width: 900px; }
+        header { text-align: center; margin-bottom: 40px; }
+        header h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.015em; margin-bottom: 8px; text-transform: uppercase; }
+        header p { font-size: 19px; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.5px; }
 
-        header { text-align: center; margin-bottom: 40px; }
-        header h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 8px; }
-        header p { font-size: 16px; color: var(--text-secondary); font-weight: 400; }
+        /* Upload Section */
+        .upload-section {
+            background: var(--card-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border: var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-        /* Upload Section */
-        .upload-section {
-            background: var(--card-bg);
-            border: var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            box-shadow: var(--shadow);
-            margin-bottom: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+        
+        input[type="text"], input[type="file"] {
+            width: 100%; padding: 16px; border-radius: var(--radius-md);
+            border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.8);
+            font-size: 16px; font-family: inherit; transition: var(--transition);
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2); }
+        input[type="file"]::file-selector-button {
+            background-color: var(--bg-color); border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px; padding: 8px 16px; margin-right: 16px;
+            cursor: pointer; font-weight: 500; transition: var(--transition);
+        }
+        
+        .btn-submit {
+            background-color: var(--accent-color); color: white; border: none;
+            padding: 16px 24px; border-radius: 980px; font-size: 17px;
+            font-weight: 600; cursor: pointer; transition: var(--transition); align-self: flex-end;
+        }
+        .btn-submit:hover { background-color: var(--accent-hover); transform: scale(1.02); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .input-group { display: flex; flex-direction: column; gap: 6px; }
-        .input-group label { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        input[type="text"], input[type="file"] {
-            width: 100%; padding: 10px 14px; border-radius: var(--radius-md);
-            border: var(--glass-border); background: var(--input-bg);
-            color: var(--text-primary); font-size: 15px; font-family: inherit; transition: var(--transition);
-        }
-        input[type="text"]::placeholder { color: var(--text-secondary); opacity: 0.6; }
-        input[type="text"]:focus { outline: none; border-color: var(--accent-color); }
-        
-        input[type="file"]::file-selector-button {
-            background-color: var(--bg-color); border: var(--glass-border);
-            color: var(--text-primary); border-radius: 4px; padding: 6px 12px; margin-right: 12px;
-            cursor: pointer; font-weight: 500; transition: var(--transition);
-        }
-        input[type="file"]::file-selector-button:hover { background-color: var(--card-bg); }
-        
-        .btn-submit {
-            background-color: var(--accent-color); color: white; border: none;
-            padding: 10px 20px; border-radius: var(--radius-md); font-size: 15px;
-            font-weight: 500; cursor: pointer; transition: var(--transition); align-self: flex-end;
-        }
-        .btn-submit:hover { background-color: var(--accent-hover); }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* Gallery Grid */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        
+        .empty-state { text-align: center; grid-column: 1 / -1; color: var(--text-secondary); padding: 40px; font-size: 18px; }
 
-        /* Gallery Grid */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-        
-        .empty-state { text-align: center; grid-column: 1 / -1; color: var(--text-secondary); padding: 40px; font-size: 16px; }
+        .card {
+            background: var(--card-bg); backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border: var(--glass-border); border-radius: var(--radius-lg);
+            overflow: hidden; box-shadow: var(--shadow); transition: var(--transition);
+            cursor: pointer; position: relative;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .card:hover { transform: translateY(-5px) scale(1.01); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12); }
 
-        .card {
-            background: var(--card-bg); border: var(--glass-border); border-radius: var(--radius-lg);
-            overflow: hidden; box-shadow: var(--shadow); transition: var(--transition);
-            cursor: pointer; position: relative;
-            animation: fadeIn 0.4s ease forwards;
-        }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(15, 15, 15, 0.15); }
+        .card-image { width: 100%; height: 220px; object-fit: cover; background-color: #e8e8ed; }
+        .photo-count {
+            position: absolute; top: 16px; right: 16px;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            color: white; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 980px;
+        }
+        .card-content { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .card-text { display: flex; flex-direction: column; }
+        .card-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.01em; }
+        .card-date { font-size: 14px; color: var(--text-secondary); }
+        
+        .btn-delete {
+            background: none; border: none; color: var(--danger-color); font-size: 20px;
+            cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s;
+        }
+        .btn-delete:hover { background: rgba(255, 59, 48, 0.1); }
 
-        .card-image { width: 100%; height: 200px; object-fit: cover; background-color: var(--input-bg); }
-        .photo-count {
-            position: absolute; top: 12px; right: 12px;
-            background: rgba(15, 15, 15, 0.6); color: white; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px;
-        }
-        .card-content { padding: 16px; display: flex; justify-content: space-between; align-items: center; }
-        .card-text { display: flex; flex-direction: column; }
-        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-        .card-date { font-size: 13px; color: var(--text-secondary); }
-        
-        .btn-delete {
-            background: none; border: none; color: var(--danger-color); font-size: 18px;
-            cursor: pointer; padding: 6px; border-radius: 4px; transition: background 0.2s;
-        }
-        .btn-delete:hover { background: rgba(235, 87, 87, 0.1); }
+        /* Album Modal */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-overlay); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: flex-end; 
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease; z-index: 100;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        
+        .modal-content {
+            background: var(--bg-color); width: 100%; max-width: 900px; height: 85vh;
+            border-radius: 24px 24px 0 0; padding: 30px; overflow-y: auto;
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.2); position: relative;
+        }
+        .modal.active .modal-content { transform: translateY(0); }
+        
+        .close-btn {
+            position: sticky; top: 0; float: right; background: rgba(0,0,0,0.1); border: none;
+            width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 2; margin-bottom: -36px;
+        }
 
-        /* Album Modal */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--modal-overlay); display: flex; justify-content: center; align-items: flex-end; 
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 100;
-        }
-        .modal.active { opacity: 1; pointer-events: auto; }
-        
-        .modal-content {
-            background: var(--bg-color); width: 100%; max-width: 900px; height: 85vh;
-            border-radius: 12px 12px 0 0; padding: 24px; overflow-y: auto;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 -4px 24px rgba(0,0,0,0.15); position: relative;
-            border-top: var(--glass-border);
-        }
-        .modal.active .modal-content { transform: translateY(0); }
-        
-        .close-btn {
-            position: sticky; top: 0; float: right; background: var(--card-bg); border: var(--glass-border);
-            color: var(--text-primary); width: 32px; height: 32px; border-radius: 4px; font-size: 16px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; z-index: 2; margin-bottom: -32px;
-        }
+        .modal-title { font-size: 32px; font-weight: 700; margin-bottom: 24px; padding-top: 10px;}
+        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .album-item {
+            width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .album-item:hover { transform: scale(1.03); }
 
-        .modal-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; padding-top: 10px;}
-        .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .album-item {
-            width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px;
-            cursor: pointer; transition: transform 0.2s; background-color: var(--input-bg);
-        }
-        .album-item:hover { transform: scale(1.02); }
+        /* Lightbox (Updated for Drag & Zoom) */
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--lightbox-bg); display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200;
+            overflow: hidden; /* Prevents scrollbars when zooming */
+        }
+        .lightbox.active { opacity: 1; pointer-events: auto; }
+        
+        .lightbox-img {
+            max-width: 90%; max-height: 90vh; border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease-out; /* Smooth scroll feeling */
+            transform-origin: center center;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-drag: none; /* Prevents default browser image drag */
+        }
+        .lightbox-img:active { cursor: grabbing; }
 
-        /* Lightbox */
-        .lightbox {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--lightbox-bg); display: flex; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200;
-            overflow: hidden;
-        }
-        .lightbox.active { opacity: 1; pointer-events: auto; }
-        
-        .lightbox-img {
-            max-width: 90%; max-height: 90vh; border-radius: 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.1s ease-out;
-            transform-origin: center center;
-            cursor: grab;
-            user-select: none;
-            -webkit-user-drag: none;
-        }
-        .lightbox-img:active { cursor: grabbing; }
+        .lb-controls { 
+            position: absolute; color: white; background: rgba(255,255,255,0.2); border: none; 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+            width: 50px; height: 50px; border-radius: 25px; font-size: 24px; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; 
+            z-index: 210;
+        }
+        .lb-controls:hover { background: rgba(255,255,255,0.4); }
+        .lb-prev { left: 20px; }
+        .lb-next { right: 20px; }
+        .lb-close { top: 20px; right: 20px; }
+        
+        @keyframes fadeIn { to { opacity: 1; } }
 
-        .lb-controls { 
-            position: absolute; color: white; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); 
-            width: 44px; height: 44px; border-radius: 6px; font-size: 20px; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; 
-            z-index: 210;
-        }
-        .lb-controls:hover { background: rgba(255,255,255,0.3); }
-        .lb-prev { left: 20px; }
-        .lb-next { right: 20px; }
-        .lb-close { top: 20px; right: 20px; }
-        
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        @media (max-width: 600px) {
-            .album-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            header h1 { font-size: 26px; }
-            .modal-content { height: 90vh; padding: 16px; }
-            .lb-controls { width: 38px; height: 38px; font-size: 16px; }
-        }
-    </style>
+        @media (max-width: 600px) {
+            .album-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            header h1 { font-size: 32px; }
+            .modal-content { height: 90vh; padding: 20px; }
+            .lb-controls { width: 40px; height: 40px; font-size: 18px; }
+        }
+    </style>
 </head>
 <body>
 
-    <div class="widget-container">
-        <header>
-            <h1>DRD DOMAIN</h1>
-            <p>Daksh, Rishit, Dhruv DOMAIN</p>
-        </header>
+    <div class="widget-container">
+        <header>
+            <h1>DRD DOMAIN</h1>
+            <p>Daksh, Rishit, Dhruv DOMAIN</p>
+        </header>
 
-        <div class="upload-section">
-            <div class="input-group">
-                <label for="albumTitle">Album Title</label>
-                <input type="text" id="albumTitle" placeholder="E.g., The Boys in the Mountains..." required>
-            </div>
-            <div class="input-group">
-                <label for="photoFiles">Select Photos</label>
-                <input type="file" id="photoFiles" accept="image/*" multiple required>
-            </div>
-            <button class="btn-submit" id="submitBtn" onclick="handleUpload()">Create Album</button>
-        </div>
+        <div class="upload-section">
+            <div class="input-group">
+                <label for="albumTitle">Album Title</label>
+                <input type="text" id="albumTitle" placeholder="E.g., The Boys in the Mountains..." required>
+            </div>
+            <div class="input-group">
+                <label for="photoFiles">Select Photos</label>
+                <input type="file" id="photoFiles" accept="image/*" multiple required>
+            </div>
+            <button class="btn-submit" id="submitBtn" onclick="handleUpload()">Create Album</button>
+        </div>
 
-        <div class="gallery-grid" id="galleryGrid">
-            <div class="empty-state">Loading your saved albums...</div>
-        </div>
-    </div>
+        <div class="gallery-grid" id="galleryGrid">
+            <div class="empty-state">Loading your saved albums...</div>
+        </div>
+    </div>
 
-    <div class="modal" id="albumModal" onclick="closeModal(event)">
-        <div class="modal-content" id="modalContent">
-            <button class="close-btn" onclick="closeModal(event, true)">✕</button>
-            <h2 class="modal-title" id="modalTitle">Album Title</h2>
-            <div class="album-grid" id="albumGrid"></div>
-        </div>
-    </div>
+    <div class="modal" id="albumModal" onclick="closeModal(event)">
+        <div class="modal-content" id="modalContent">
+            <button class="close-btn" onclick="closeModal(event, true)">✕</button>
+            <h2 class="modal-title" id="modalTitle">Album Title</h2>
+            <div class="album-grid" id="albumGrid"></div>
+        </div>
+    </div>
 
-    <div class="lightbox" id="lightbox">
-        <button class="lb-controls lb-close" onclick="closeLightbox()">✕</button>
-        <button class="lb-controls lb-prev" onclick="navigateLightbox(-1)">❮</button>
-        <img src="" alt="" class="lightbox-img" id="lightboxImg">
-        <button class="lb-controls lb-next" onclick="navigateLightbox(1)">❯</button>
-    </div>
+    <div class="lightbox" id="lightbox">
+        <button class="lb-controls lb-close" onclick="closeLightbox()">✕</button>
+        <button class="lb-controls lb-prev" onclick="navigateLightbox(-1)">❮</button>
+        <img src="" alt="" class="lightbox-img" id="lightboxImg">
+        <button class="lb-controls lb-next" onclick="navigateLightbox(1)">❯</button>
+    </div>
 
-    <script>
-        // ==========================================
-        // 0. NOTION THEME ENGINE (Run Instantly)
-        // ==========================================
-        function initNotionTheme() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const themeParam = urlParams.get('theme');
-            const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    <script>
+        // ==========================================
+        // 1. DATABASE ARCHITECTURE (IndexedDB)
+        // ==========================================
+        let db;
+        let albumsData = []; 
+        let currentAlbumIndex = null;
+        let currentPhotoIndex = null;
 
-            function applyTheme() {
-                // If explicitly set via ?theme=dark, or if set to auto/unset and system is dark
-                if (themeParam === 'dark' || (!themeParam && systemDark.matches)) {
-                    document.body.classList.add('dark-theme');
-                } else {
-                    document.body.classList.remove('dark-theme');
-                }
-            }
+        const dbRequest = indexedDB.open("AppleGalleryDB", 1);
 
-            applyTheme();
+        dbRequest.onerror = function(event) {
+            console.error("Database error: " + event.target.errorCode);
+            document.getElementById('galleryGrid').innerHTML = '<div class="empty-state">Database error. Cannot load albums.</div>';
+        };
 
-            // Watch for system theme changes if no explicit URL param override exists
-            if (!themeParam) {
-                systemDark.addEventListener('change', applyTheme);
-            }
-        }
-        initNotionTheme();
+        dbRequest.onupgradeneeded = function(event) {
+            db = event.target.result;
+            const objectStore = db.createObjectStore("albums", { keyPath: "id" });
+            objectStore.createIndex("date", "date", { unique: false });
+        };
 
-        // ==========================================
-        // 1. DATABASE ARCHITECTURE (IndexedDB)
-        // ==========================================
-        let db;
-        let albumsData = []; 
-        let currentAlbumIndex = null;
-        let currentPhotoIndex = null;
+        dbRequest.onsuccess = function(event) {
+            db = event.target.result;
+            loadAlbumsFromDB();
+        };
 
-        const dbRequest = indexedDB.open("AppleGalleryDB", 1);
+        function loadAlbumsFromDB() {
+            const transaction = db.transaction(["albums"], "readonly");
+            const objectStore = transaction.objectStore("albums");
+            const request = objectStore.getAll();
 
-        dbRequest.onerror = function(event) {
-            console.error("Database error: " + event.target.errorCode);
-            document.getElementById('galleryGrid').innerHTML = '<div class="empty-state">Database error. Cannot load albums.</div>';
-        };
+            request.onsuccess = function(event) {
+                albumsData = event.target.result.sort((a, b) => b.id - a.id);
+                renderGallery();
+            };
+        }
 
-        dbRequest.onupgradeneeded = function(event) {
-            db = event.target.result;
-            const objectStore = db.createObjectStore("albums", { keyPath: "id" });
-            objectStore.createIndex("date", "date", { unique: false });
-        };
+        function saveAlbumToDB(album) {
+            const transaction = db.transaction(["albums"], "readwrite");
+            const objectStore = transaction.objectStore("albums");
+            objectStore.add(album);
+        }
 
-        dbRequest.onsuccess = function(event) {
-            db = event.target.result;
-            loadAlbumsFromDB();
-        };
+        function deleteAlbumFromDB(id, event) {
+            event.stopPropagation(); 
+            if(!confirm("Are you sure you want to delete this album permanently?")) return;
 
-        function loadAlbumsFromDB() {
-            const transaction = db.transaction(["albums"], "readonly");
-            const objectStore = transaction.objectStore("albums");
-            const request = objectStore.getAll();
+            const transaction = db.transaction(["albums"], "readwrite");
+            const objectStore = transaction.objectStore("albums");
+            const request = objectStore.delete(id);
 
-            request.onsuccess = function(event) {
-                albumsData = event.target.result.sort((a, b) => b.id - a.id);
-                renderGallery();
-            };
-        }
+            request.onsuccess = function() {
+                albumsData = albumsData.filter(album => album.id !== id);
+                renderGallery();
+            };
+        }
 
-        function saveAlbumToDB(album) {
-            const transaction = db.transaction(["albums"], "readwrite");
-            const objectStore = transaction.objectStore("albums");
-            objectStore.add(album);
-        }
+        // ==========================================
+        // 2. UPLOAD LOGIC & PROCESSING
+        // ==========================================
+        async function handleUpload() {
+            const titleInput = document.getElementById('albumTitle');
+            const fileInput = document.getElementById('photoFiles');
+            const submitBtn = document.getElementById('submitBtn');
 
-        function deleteAlbumFromDB(id, event) {
-            event.stopPropagation(); 
-            if(!confirm("Are you sure you want to delete this album permanently?")) return;
+            const title = titleInput.value.trim();
+            const files = Array.from(fileInput.files); 
 
-            const transaction = db.transaction(["albums"], "readwrite");
-            const objectStore = transaction.objectStore("albums");
-            const request = objectStore.delete(id);
+            if (!title) return alert("Please provide a title.");
+            if (files.length === 0) return alert("Please select at least one photo.");
 
-            request.onsuccess = function() {
-                albumsData = albumsData.filter(album => album.id !== id);
-                renderGallery();
-            };
-        }
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Processing & Saving...";
 
-        // ==========================================
-        // 2. UPLOAD LOGIC & PROCESSING
-        // ==========================================
-        async function handleUpload() {
-            const titleInput = document.getElementById('albumTitle');
-            const fileInput = document.getElementById('photoFiles');
-            const submitBtn = document.getElementById('submitBtn');
+            try {
+                const imagePromises = files.map(file => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                });
 
-            const title = titleInput.value.trim();
-            const files = Array.from(fileInput.files); 
+                const images = await Promise.all(imagePromises);
 
-            if (!title) return alert("Please provide a title.");
-            if (files.length === 0) return alert("Please select at least one photo.");
+                const newAlbum = {
+                    id: Date.now(),
+                    title: title,
+                    images: images,
+                    date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                };
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Processing & Saving...";
+                albumsData.unshift(newAlbum);
+                saveAlbumToDB(newAlbum);
+                renderGallery();
 
-            try {
-                const imagePromises = files.map(file => {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = e => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
-                });
+                titleInput.value = '';
+                fileInput.value = '';
+            } catch (error) {
+                alert("Error processing images. Files might be too large.");
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Create Album";
+            }
+        }
 
-                const images = await Promise.all(imagePromises);
+        // ==========================================
+        // 3. UI RENDERING & INTERACTION
+        // ==========================================
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
 
-                const newAlbum = {
-                    id: Date.now(),
-                    title: title,
-                    images: images,
-                    date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                };
+            if (albumsData.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No albums yet. Upload photos to get started!</div>';
+                return;
+            }
 
-                albumsData.unshift(newAlbum);
-                saveAlbumToDB(newAlbum);
-                renderGallery();
+            albumsData.forEach((album, index) => {
+                const coverImage = album.images[0];
+                const count = album.images.length;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openAlbum(index);
 
-                titleInput.value = '';
-                fileInput.value = '';
-            } catch (error) {
-                alert("Error processing images. Files might be too large.");
-                console.error(error);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Create Album";
-            }
-        }
+                card.innerHTML = `
+                    <div style="position:relative">
+                        <img src="${coverImage}" alt="${album.title}" class="card-image">
+                        <span class="photo-count">${count} ${count > 1 ? 'Photos' : 'Photo'}</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-text">
+                            <h3 class="card-title">${album.title}</h3>
+                            <span class="card-date">${album.date}</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteAlbumFromDB(${album.id}, event)" title="Delete Album">🗑️</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
 
-        // ==========================================
-        // 3. UI RENDERING & INTERACTION
-        // ==========================================
-        function renderGallery() {
-            const grid = document.getElementById('galleryGrid');
-            grid.innerHTML = '';
+        // ==========================================
+        // 4. ALBUM MODAL CONTROLS
+        // ==========================================
+        function openAlbum(index) {
+            currentAlbumIndex = index;
+            const album = albumsData[index];
+            const modal = document.getElementById('albumModal');
+            const title = document.getElementById('modalTitle');
+            const grid = document.getElementById('albumGrid');
 
-            if (albumsData.length === 0) {
-                grid.innerHTML = '<div class="empty-state">No albums yet. Upload photos to get started!</div>';
-                return;
-            }
+            title.textContent = album.title;
+            grid.innerHTML = '';
 
-            albumsData.forEach((album, index) => {
-                const coverImage = album.images[0];
-                const count = album.images.length;
-                
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => openAlbum(index);
+            album.images.forEach((imgSrc, imgIndex) => {
+                const imgEl = document.createElement('img');
+                imgEl.src = imgSrc;
+                imgEl.className = 'album-item';
+                imgEl.onclick = () => openLightbox(imgIndex);
+                grid.appendChild(imgEl);
+            });
 
-                card.innerHTML = `
-                    <div style="position:relative">
-                        <img src="${coverImage}" alt="${album.title}" class="card-image">
-                        <span class="photo-count">${count} ${count > 1 ? 'Photos' : 'Photo'}</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-text">
-                            <h3 class="card-title">${album.title}</h3>
-                            <span class="card-date">${album.date}</span>
-                        </div>
-                        <button class="btn-delete" onclick="deleteAlbumFromDB(${album.id}, event)" title="Delete Album">🗑️</button>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
+            document.body.style.overflow = 'hidden'; 
+            modal.classList.add('active');
+        }
 
-        // ==========================================
-        // 4. ALBUM MODAL CONTROLS
-        // ==========================================
-        function openAlbum(index) {
-            currentAlbumIndex = index;
-            const album = albumsData[index];
-            const modal = document.getElementById('albumModal');
-            const title = document.getElementById('modalTitle');
-            const grid = document.getElementById('albumGrid');
+        function closeModal(event, force = false) {
+            if (force || event.target.id === 'albumModal') {
+                document.getElementById('albumModal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
 
-            title.textContent = album.title;
-            grid.innerHTML = '';
+        // ==========================================
+        // 5. ADVANCED LIGHTBOX (SCROLL ZOOM & PAN)
+        // ==========================================
+        const lightboxImg = document.getElementById('lightboxImg');
+        let currentScale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY;
 
-            album.images.forEach((imgSrc, imgIndex) => {
-                const imgEl = document.createElement('img');
-                imgEl.src = imgSrc;
-                imgEl.className = 'album-item';
-                imgEl.onclick = () => openLightbox(imgIndex);
-                grid.appendChild(imgEl);
-            });
+        function updateTransform() {
+            lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        }
 
-            document.body.style.overflow = 'hidden'; 
-            modal.classList.add('active');
-        }
+        function resetZoom() {
+            currentScale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        }
 
-        // Force parameter added to window event matching logic
-        function closeModal(event, force = false) {
-            if (force || event.target.id === 'albumModal') {
-                document.getElementById('albumModal').classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }
+        // Zoom with Mouse Scroll Wheel
+        lightboxImg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomSensitivity = 0.1;
+            const delta = e.deltaY < 0 ? 1 : -1;
+            
+            currentScale += delta * zoomSensitivity;
+            currentScale = Math.min(Math.max(1, currentScale), 5); // Limits zoom between 1x and 5x
+            
+            if (currentScale === 1) {
+                translateX = 0;
+                translateY = 0;
+            }
+            updateTransform();
+        }, { passive: false });
 
-        // ==========================================
-        // 5. ADVANCED LIGHTBOX (SCROLL ZOOM & PAN)
-        // ==========================================
-        const lightboxImg = document.getElementById('lightboxImg');
-        let currentScale = 1;
-        let translateX = 0;
-        let translateY = 0;
-        let isDragging = false;
-        let startX, startY;
+        // Double-click to quick zoom
+        lightboxImg.addEventListener('dblclick', () => {
+            if (currentScale > 1) {
+                resetZoom();
+            } else {
+                currentScale = 2.5;
+                updateTransform();
+            }
+        });
 
-        function updateTransform() {
-            lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
-        }
+        // Click and Drag to Pan Image
+        lightboxImg.addEventListener('mousedown', (e) => {
+            if (currentScale > 1) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+            }
+        });
 
-        function resetZoom() {
-            currentScale = 1;
-            translateX = 0;
-            translateY = 0;
-            updateTransform();
-        }
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateTransform();
+        });
 
-        // Zoom with Mouse Scroll Wheel
-        lightboxImg.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const zoomSensitivity = 0.1;
-            const delta = e.deltaY < 0 ? 1 : -1;
-            
-            currentScale += delta * zoomSensitivity;
-            currentScale = Math.min(Math.max(1, currentScale), 5); // Limits zoom between 1x and 5x
-            
-            if (currentScale === 1) {
-                translateX = 0;
-                translateY = 0;
-            }
-            updateTransform();
-        }, { passive: false });
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
 
-        // Double-click to quick zoom
-        lightboxImg.addEventListener('dblclick', () => {
-            if (currentScale > 1) {
-                resetZoom();
-            } else {
-                currentScale = 2.5;
-                updateTransform();
-            }
-        });
+        // Basic Navigation
+        function openLightbox(imgIndex) {
+            currentPhotoIndex = imgIndex;
+            updateLightboxImage();
+            document.getElementById('lightbox').classList.add('active');
+        }
 
-        // Click and Drag to Pan Image
-        lightboxImg.addEventListener('mousedown', (e) => {
-            if (currentScale > 1) {
-                isDragging = true;
-                startX = e.clientX - translateX;
-                startY = e.clientY - translateY;
-            }
-        });
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            resetZoom();
+        }
 
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            translateX = e.clientX - startX;
-            translateY = e.clientY - startY;
-            updateTransform();
-        });
+        function updateLightboxImage() {
+            resetZoom();
+            const album = albumsData[currentAlbumIndex];
+            lightboxImg.src = album.images[currentPhotoIndex];
+        }
 
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+        function navigateLightbox(direction) {
+            const album = albumsData[currentAlbumIndex];
+            currentPhotoIndex += direction;
+            if (currentPhotoIndex < 0) currentPhotoIndex = album.images.length - 1;
+            if (currentPhotoIndex >= album.images.length) currentPhotoIndex = 0;
+            updateLightboxImage();
+        }
 
-        // Basic Navigation
-        function openLightbox(imgIndex) {
-            currentPhotoIndex = imgIndex;
-            updateLightboxImage();
-            document.getElementById('lightbox').classList.add('active');
-        }
-
-        // Reset system hook cleanup
-        function closeLightbox() {
-            document.getElementById('lightbox').classList.remove('active');
-            resetZoom();
-        }
-
-        function updateLightboxImage() {
-            resetZoom();
-            const album = albumsData[currentAlbumIndex];
-            lightboxImg.src = album.images[currentPhotoIndex];
-        }
-
-        function navigateLightbox(direction) {
-            const album = albumsData[currentAlbumIndex];
-            currentPhotoIndex += direction;
-            if (currentPhotoIndex < 0) currentPhotoIndex = album.images.length - 1;
-            if (currentPhotoIndex >= album.images.length) currentPhotoIndex = 0;
-            updateLightboxImage();
-        }
-
-        // Keyboard accessibility
-        document.addEventListener('keydown', (e) => {
-            const lightbox = document.getElementById('lightbox');
-            if (lightbox.classList.contains('active')) {
-                if (e.key === 'ArrowRight') navigateLightbox(1);
-                if (e.key === 'ArrowLeft') navigateLightbox(-1);
-                if (e.key === 'Escape') closeLightbox();
-            } else if (document.getElementById('albumModal').classList.contains('active')) {
-                if (e.key === 'Escape') closeModal(e, true);
-            }
-        });
-    </script>
+        // Keyboard accessibility
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'ArrowRight') navigateLightbox(1);
+                if (e.key === 'ArrowLeft') navigateLightbox(-1);
+                if (e.key === 'Escape') closeLightbox();
+            } else if (document.getElementById('albumModal').classList.contains('active')) {
+                if (e.key === 'Escape') closeModal(e, true);
+            }
+        });
+    </script>
 </body>
 </html>
