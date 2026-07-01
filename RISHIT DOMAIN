@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shared Albums Widget</title>
+    <title>Permanent Shared Albums</title>
     <style>
         /* CSS Variables for Apple-style Light Theme */
         :root {
@@ -14,6 +14,7 @@
             --glass-border: 1px solid rgba(255, 255, 255, 0.5);
             --accent-color: #0071e3;
             --accent-hover: #0077ED;
+            --danger-color: #ff3b30;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             --modal-overlay: rgba(0, 0, 0, 0.4);
             --lightbox-bg: rgba(0, 0, 0, 0.95);
@@ -33,6 +34,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
 
         .widget-container { width: 100%; max-width: 900px; }
@@ -79,8 +81,10 @@
         .btn-submit:hover { background-color: var(--accent-hover); transform: scale(1.02); }
         .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Gallery Grid (Albums) */
+        /* Gallery Grid */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        
+        .empty-state { text-align: center; grid-column: 1 / -1; color: var(--text-secondary); padding: 40px; font-size: 18px; }
 
         .card {
             background: var(--card-bg); backdrop-filter: saturate(180%) blur(20px);
@@ -98,15 +102,22 @@
             background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             color: white; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 980px;
         }
-        .card-content { padding: 20px; }
+        .card-content { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .card-text { display: flex; flex-direction: column; }
         .card-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.01em; }
         .card-date { font-size: 14px; color: var(--text-secondary); }
+        
+        .btn-delete {
+            background: none; border: none; color: var(--danger-color); font-size: 20px;
+            cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s;
+        }
+        .btn-delete:hover { background: rgba(255, 59, 48, 0.1); }
 
-        /* Album Modal (Inside the card view) */
+        /* Album Modal */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--modal-overlay); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            display: flex; justify-content: center; align-items: flex-end; /* Slides up from bottom like Apple Maps/Photos */
+            display: flex; justify-content: center; align-items: flex-end; 
             opacity: 0; pointer-events: none; transition: opacity 0.4s ease; z-index: 100;
         }
         .modal.active { opacity: 1; pointer-events: auto; }
@@ -133,7 +144,7 @@
         }
         .album-item:hover { transform: scale(1.03); }
 
-        /* Lightbox (Full screen image viewer) */
+        /* Lightbox */
         .lightbox {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--lightbox-bg); display: flex; justify-content: center; align-items: center;
@@ -148,7 +159,12 @@
         }
         .lightbox-img.zoomed { transform: scale(2); cursor: zoom-out; }
 
-        .lb-controls { position: absolute; color: white; background: rgba(255,255,255,0.2); border: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); width: 50px; height: 50px; border-radius: 25px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .lb-controls { 
+            position: absolute; color: white; background: rgba(255,255,255,0.2); border: none; 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+            width: 50px; height: 50px; border-radius: 25px; font-size: 24px; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; 
+        }
         .lb-controls:hover { background: rgba(255,255,255,0.4); }
         .lb-prev { left: 20px; }
         .lb-next { right: 20px; }
@@ -156,7 +172,6 @@
         
         @keyframes fadeIn { to { opacity: 1; } }
 
-        /* Mobile Adjustments */
         @media (max-width: 600px) {
             .album-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
             header h1 { font-size: 32px; }
@@ -170,7 +185,7 @@
     <div class="widget-container">
         <header>
             <h1>Shared Albums</h1>
-            <p>Upload and organize your memories.</p>
+            <p>Your permanent local gallery.</p>
         </header>
 
         <div class="upload-section">
@@ -178,16 +193,16 @@
                 <label for="albumTitle">Album Title</label>
                 <input type="text" id="albumTitle" placeholder="E.g., Summer Vacation..." required>
             </div>
-            
             <div class="input-group">
                 <label for="photoFiles">Select Photos</label>
                 <input type="file" id="photoFiles" accept="image/*" multiple required>
             </div>
-
             <button class="btn-submit" id="submitBtn" onclick="handleUpload()">Create Album</button>
         </div>
 
-        <div class="gallery-grid" id="galleryGrid"></div>
+        <div class="gallery-grid" id="galleryGrid">
+            <div class="empty-state">Loading your saved albums...</div>
+        </div>
     </div>
 
     <div class="modal" id="albumModal" onclick="closeModal(event)">
@@ -206,27 +221,91 @@
     </div>
 
     <script>
-        let albumsData = []; // Main state
+        // ==========================================
+        // 1. DATABASE ARCHITECTURE (IndexedDB)
+        // ==========================================
+        let db;
+        let albumsData = []; 
         let currentAlbumIndex = null;
         let currentPhotoIndex = null;
 
-        // 1. Upload Logic
+        // Initialize the local browser database
+        const dbRequest = indexedDB.open("AppleGalleryDB", 1);
+
+        dbRequest.onerror = function(event) {
+            console.error("Database error: " + event.target.errorCode);
+            document.getElementById('galleryGrid').innerHTML = '<div class="empty-state">Database error. Cannot load albums.</div>';
+        };
+
+        dbRequest.onupgradeneeded = function(event) {
+            // This runs the very first time the user opens the app
+            db = event.target.result;
+            const objectStore = db.createObjectStore("albums", { keyPath: "id" });
+            objectStore.createIndex("date", "date", { unique: false });
+        };
+
+        dbRequest.onsuccess = function(event) {
+            db = event.target.result;
+            loadAlbumsFromDB(); // Fetch saved data immediately on load
+        };
+
+        // Fetch data from database
+        function loadAlbumsFromDB() {
+            const transaction = db.transaction(["albums"], "readonly");
+            const objectStore = transaction.objectStore("albums");
+            const request = objectStore.getAll();
+
+            request.onsuccess = function(event) {
+                // Sort so newest appears first
+                albumsData = event.target.result.sort((a, b) => b.id - a.id);
+                renderGallery();
+            };
+        }
+
+        // Save new album to database
+        function saveAlbumToDB(album) {
+            const transaction = db.transaction(["albums"], "readwrite");
+            const objectStore = transaction.objectStore("albums");
+            objectStore.add(album);
+        }
+
+        // Delete album from database
+        function deleteAlbumFromDB(id, event) {
+            event.stopPropagation(); // Prevents opening the album when clicking delete
+            
+            if(!confirm("Are you sure you want to delete this album permanently?")) return;
+
+            const transaction = db.transaction(["albums"], "readwrite");
+            const objectStore = transaction.objectStore("albums");
+            const request = objectStore.delete(id);
+
+            request.onsuccess = function() {
+                // Remove from local array and re-render
+                albumsData = albumsData.filter(album => album.id !== id);
+                renderGallery();
+            };
+        }
+
+
+        // ==========================================
+        // 2. UPLOAD LOGIC & PROCESSING
+        // ==========================================
         async function handleUpload() {
             const titleInput = document.getElementById('albumTitle');
             const fileInput = document.getElementById('photoFiles');
             const submitBtn = document.getElementById('submitBtn');
 
             const title = titleInput.value.trim();
-            const files = Array.from(fileInput.files); // Convert FileList to Array
+            const files = Array.from(fileInput.files); 
 
             if (!title) return alert("Please provide a title.");
             if (files.length === 0) return alert("Please select at least one photo.");
 
             submitBtn.disabled = true;
-            submitBtn.textContent = "Processing...";
+            submitBtn.textContent = "Processing & Saving...";
 
             try {
-                // Read all files asynchronously
+                // Convert files to Base64 asynchronously
                 const imagePromises = files.map(file => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
@@ -235,7 +314,6 @@
                     });
                 });
 
-                // Wait for all images to be converted to Base64 data URLs
                 const images = await Promise.all(imagePromises);
 
                 const newAlbum = {
@@ -245,24 +323,35 @@
                     date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                 };
 
+                // Save to state, Save to DB, and Render
                 albumsData.unshift(newAlbum);
+                saveAlbumToDB(newAlbum);
                 renderGallery();
 
-                // Reset
+                // Reset inputs
                 titleInput.value = '';
                 fileInput.value = '';
             } catch (error) {
-                alert("Error processing images.");
+                alert("Error processing images. Files might be too large.");
+                console.error(error);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Create Album";
             }
         }
 
-        // 2. Render Main Grid
+
+        // ==========================================
+        // 3. UI RENDERING & INTERACTION
+        // ==========================================
         function renderGallery() {
             const grid = document.getElementById('galleryGrid');
             grid.innerHTML = '';
+
+            if (albumsData.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No albums yet. Upload photos to get started!</div>';
+                return;
+            }
 
             albumsData.forEach((album, index) => {
                 const coverImage = album.images[0];
@@ -278,15 +367,22 @@
                         <span class="photo-count">${count} ${count > 1 ? 'Photos' : 'Photo'}</span>
                     </div>
                     <div class="card-content">
-                        <h3 class="card-title">${album.title}</h3>
-                        <span class="card-date">${album.date}</span>
+                        <div class="card-text">
+                            <h3 class="card-title">${album.title}</h3>
+                            <span class="card-date">${album.date}</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteAlbumFromDB(${album.id}, event)" title="Delete Album">
+                            🗑️
+                        </button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // 3. Album Modal Logic
+        // ==========================================
+        // 4. ALBUM MODAL CONTROLS
+        // ==========================================
         function openAlbum(index) {
             currentAlbumIndex = index;
             const album = albumsData[index];
@@ -305,25 +401,24 @@
                 grid.appendChild(imgEl);
             });
 
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            document.body.style.overflow = 'hidden'; 
             modal.classList.add('active');
         }
 
         function closeModal(event, force = false) {
-            // Close if clicking outside the modal content, or if force closed (X button)
             if (force || event.target.id === 'albumModal') {
                 document.getElementById('albumModal').classList.remove('active');
                 document.body.style.overflow = '';
             }
         }
 
-        // 4. Lightbox Logic
+        // ==========================================
+        // 5. FULLSCREEN LIGHTBOX CONTROLS
+        // ==========================================
         function openLightbox(imgIndex) {
             currentPhotoIndex = imgIndex;
             updateLightboxImage();
             document.getElementById('lightbox').classList.add('active');
-            
-            // Remove zoom if open new image
             document.getElementById('lightboxImg').classList.remove('zoomed');
         }
 
@@ -336,27 +431,23 @@
             const album = albumsData[currentAlbumIndex];
             const img = document.getElementById('lightboxImg');
             img.src = album.images[currentPhotoIndex];
-            img.classList.remove('zoomed'); // reset zoom on navigation
+            img.classList.remove('zoomed'); 
         }
 
         function navigateLightbox(direction) {
             const album = albumsData[currentAlbumIndex];
             currentPhotoIndex += direction;
-
-            // Loop around if at the ends
             if (currentPhotoIndex < 0) currentPhotoIndex = album.images.length - 1;
             if (currentPhotoIndex >= album.images.length) currentPhotoIndex = 0;
-
             updateLightboxImage();
         }
 
-        // 5. Zoom Logic
         function toggleZoom() {
             const img = document.getElementById('lightboxImg');
             img.classList.toggle('zoomed');
         }
 
-        // Keyboard navigation for Lightbox
+        // Keyboard accessibility
         document.addEventListener('keydown', (e) => {
             const lightbox = document.getElementById('lightbox');
             if (lightbox.classList.contains('active')) {
