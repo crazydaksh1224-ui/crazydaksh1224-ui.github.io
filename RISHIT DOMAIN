@@ -434,6 +434,88 @@ document.querySelectorAll(".addCard").forEach(card => {
     });
 
 });
+/* ===== PART 3B ===== */
+
+.timeline{
+position:relative;
+display:flex;
+flex-direction:column;
+gap:45px;
+}
+
+.timelineLine{
+position:absolute;
+left:16px;
+top:15px;
+bottom:15px;
+width:2px;
+background:#e5e5e5;
+}
+
+.daySection{
+position:relative;
+padding-left:55px;
+}
+
+.dayHeader{
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:18px;
+}
+
+.dayHeader h2{
+font-size:22px;
+font-weight:700;
+}
+
+.dayDot{
+width:18px;
+height:18px;
+border-radius:50%;
+background:#111;
+margin-left:-48px;
+z-index:2;
+box-shadow:0 0 0 6px white;
+}
+
+.notesGrid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:22px;
+}
+
+.noteCard{
+background:white;
+border-radius:22px;
+border:1px solid var(--border);
+height:170px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:18px;
+font-weight:600;
+cursor:pointer;
+transition:var(--transition);
+box-shadow:0 10px 30px rgba(0,0,0,.04);
+}
+
+.noteCard:hover{
+transform:translateY(-8px);
+box-shadow:0 25px 60px rgba(0,0,0,.12);
+}
+
+.addCard{
+background:#fafafa;
+border:2px dashed #d8d8d8;
+color:#777;
+}
+
+.addCard:hover{
+background:white;
+border-color:#111;
+color:#111;
+}
 </script>
 
 </body>
